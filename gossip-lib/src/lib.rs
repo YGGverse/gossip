@@ -165,6 +165,9 @@ mod storage;
 pub use storage::types::*;
 pub use storage::{FollowingsTable, HandlersTable, PersonTable, Storage, Table};
 
+pub mod seen;
+pub use seen::{SeenCommand, SeenWriteResult};
+
 mod tasks;
 
 mod user_identity;

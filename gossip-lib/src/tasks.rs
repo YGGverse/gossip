@@ -97,7 +97,7 @@ async fn update_inbox_indicator() {
     let ids = GLOBALS.feed.get_inbox_events();
     let mut count: usize = 0;
     for id in ids {
-        if matches!(GLOBALS.db().is_event_viewed(id), Ok(false)) {
+        if matches!(crate::seen::is_viewed(id), Ok(false)) {
             count += 1;
         }
     }

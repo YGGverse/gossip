@@ -18,6 +18,7 @@ use crate::relay;
 use crate::relay::Relay;
 use crate::relay_picker::RelayAssignment;
 use crate::relay_test_results::{RelayTestResult, RelayTestResults};
+use crate::seen::SeenWriter;
 use crate::storage::types::{HandlerKey, ScoreFactors};
 use crate::storage::{PersonTable, Table};
 use crate::RunState;
@@ -59,6 +60,7 @@ pub struct Overlord {
     to_minions: Sender<ToMinionMessage>,
     inbox: UnboundedReceiver<ToOverlordMessage>,
     read_runstate: WatchReceiver<RunState>,
+    seen_writer: SeenWriter,
 }
 
 impl Overlord {
@@ -105,15 +107,19 @@ impl Overlord {
             to_minions,
             inbox,
             read_runstate: GLOBALS.read_runstate.clone(),
+            seen_writer: SeenWriter::default(),
         }
     }
 
     /// This runs the overlord. This blocks for the entire duration and only exits
     /// when the overlord receives a signal to shutdown.
     pub async fn run(&mut self) {
+        // -- enter inner run loop
         if let Err(e) = self.run_inner().await {
             tracing::error!("{}", e);
         }
+        // -- exit inner run loop
+        self.drain_seen_writes().await;
 
         if let Err(e) = GLOBALS.db().sync() {
             tracing::error!("{}", e);
@@ -261,6 +267,7 @@ impl Overlord {
                         tracing::error!("{}", e);
                     }
                 },
+                () = self.seen_writer.settle_next() => {},
                 _ = self.read_runstate.changed() => {
                     match *self.read_runstate.borrow_and_update() {
                         RunState::ShuttingDown => break 'mainloop,
@@ -605,6 +612,9 @@ impl Overlord {
             ToOverlordMessage::AuthDeclined(relay_url, permanent) => {
                 self.auth_declined(relay_url, permanent)?;
             }
+            ToOverlordMessage::Seen(command) => {
+                self.seen_writer.enqueue(command, GLOBALS.db());
+            }
             ToOverlordMessage::BlossomUpload(pathbuf) => {
                 self.blossom_upload(pathbuf).await?;
             }
@@ -850,6 +860,16 @@ impl Overlord {
         }
 
         Ok(())
+    }
+
+    async fn drain_seen_writes(&mut self) {
+        self.inbox.close();
+        while let Some(message) = self.inbox.recv().await {
+            if let ToOverlordMessage::Seen(command) = message {
+                self.seen_writer.collect(command);
+            }
+        }
+        self.seen_writer.drain().await;
     }
 
     /// Add a new relay to gossip

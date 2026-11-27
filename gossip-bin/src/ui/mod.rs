@@ -43,6 +43,7 @@ mod notifications;
 mod people;
 mod relays;
 mod search;
+mod seen;
 mod settings;
 mod theme;
 mod widgets;
@@ -50,6 +51,7 @@ mod wizard;
 mod you;
 
 use crate::about::About;
+use crate::ui::seen::Seen;
 pub use crate::ui::theme::{Theme, ThemeVariant};
 use crate::unsaved_settings::UnsavedSettings;
 #[cfg(feature = "video-ffmpeg")]
@@ -601,6 +603,8 @@ struct GossipUi {
     dm_channel_next_refresh: Instant,
     dm_channel_error: Option<String>,
 
+    seen: Seen,
+
     file_dialog: FileDialog,
     uploading: Option<PathBuf>,
 }
@@ -855,6 +859,7 @@ impl GossipUi {
             dm_channel_cache: vec![],
             dm_channel_next_refresh: Instant::now(),
             dm_channel_error: None,
+            seen: Seen::new(),
             file_dialog: FileDialog::new(),
             uploading: None,
         }
@@ -2240,6 +2245,8 @@ impl eframe::App for GossipUi {
         }
 
         self.frame_count += 1;
+
+        self.seen.update();
 
         // Enforce FPS limiting.
         // No amount of notifies or request_repaint()s can bypass this.
