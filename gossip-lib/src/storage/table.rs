@@ -94,22 +94,23 @@ pub trait Table {
     #[allow(dead_code)]
     fn read_record(
         key: <Self::Item as Record>::Key,
-        rw_txn: Option<&RoTxn<'_>>,
+        rtxn: Option<&RoTxn<'_>>,
     ) -> Result<Option<Self::Item>, Error> {
         let keybytes = key.to_bytes()?;
-
-        let mut local_txn = None;
-        let txn = maybe_local_txn!(GLOBALS.db(), rw_txn, local_txn);
-
-        let valbytes = Self::db()?.get(txn, &keybytes)?;
-        let rval = match valbytes {
-            None => None,
-            Some(valbytes) => Some(<Self::Item>::from_bytes(valbytes)?),
+        // Lazy table initialization may require a write transaction.
+        let db = Self::db()?;
+        let local_txn;
+        let txn = match rtxn {
+            Some(txn) => txn,
+            None => {
+                local_txn = GLOBALS.db().get_read_txn()?;
+                &local_txn
+            }
         };
 
-        maybe_local_txn_commit!(local_txn);
-
-        Ok(rval)
+        db.get(txn, &keybytes)?
+            .map(Self::Item::from_bytes)
+            .transpose()
     }
 
     /// Read a record or create a new one (and store it)
@@ -322,5 +323,70 @@ impl<I: Record> Iterator for TableIterator<'_, I> {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::storage::{test_storage, Person3Table, PersonTable};
+    use nostr_types::PublicKey;
+    use std::{sync::mpsc, thread, time::Duration};
+
+    #[test]
+    fn read_record_initializes_a_missing_table() {
+        let storage = test_storage();
+        let key = PublicKey::from_bytes(&[43; 32], false).unwrap();
+
+        // Use the migration table so this test doesn't depend on whether the
+        // writer-contention test has already opened the current person table.
+        let txn = storage.get_read_txn().unwrap();
+        assert!(storage
+            .env
+            .open_database::<Bytes, Bytes>(&txn, Some(Person3Table::lmdb_name()))
+            .unwrap()
+            .is_none());
+        drop(txn);
+
+        assert!(Person3Table::read_record(key, None).unwrap().is_none());
+        let txn = storage.get_read_txn().unwrap();
+        assert!(storage
+            .env
+            .open_database::<Bytes, Bytes>(&txn, Some(Person3Table::lmdb_name()))
+            .unwrap()
+            .is_some());
+        txn.commit().unwrap();
+
+        Person3Table::create_record_if_missing(key, None).unwrap();
+        assert_eq!(
+            Person3Table::read_record(key, None)
+                .unwrap()
+                .unwrap()
+                .pubkey,
+            key
+        );
+    }
+
+    #[test]
+    fn read_record_does_not_wait_for_writer() {
+        let storage = test_storage();
+        let key = PublicKey::from_bytes(&[42; 32], false).unwrap();
+        // Initialize the lazy table before any operation starts a write transaction.
+        PersonTable::db().unwrap();
+        PersonTable::create_record_if_missing(key, None).unwrap();
+        let writer = storage.get_write_txn().unwrap();
+        let (send, receive) = mpsc::channel();
+        let reader = thread::spawn(move || {
+            let _ = send.send(PersonTable::read_record(key, None));
+        });
+
+        let read_while_locked = receive.recv_timeout(Duration::from_secs(2));
+        drop(writer);
+        reader.join().unwrap();
+        let person = read_while_locked
+            .expect("read_record waited for the LMDB writer")
+            .unwrap()
+            .expect("committed person should be readable");
+        assert_eq!(person.pubkey, key);
     }
 }
