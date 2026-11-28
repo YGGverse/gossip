@@ -311,36 +311,36 @@ fn dm_posting_area(
 
         let mut items: Vec<MoreMenuItem> = Vec::new();
         if app.dm_draft_data.include_subject {
-            items.push(MoreMenuItem::Button(MoreMenuButton::new(
+            items.push(MoreMenuItem::Button(Box::new(MoreMenuButton::new(
                 "Remove Subject",
                 Box::new(|_, app| {
                     app.dm_draft_data.include_subject = false;
                     app.dm_draft_data.subject = "".to_owned();
                 }),
-            )));
+            ))));
         } else {
-            items.push(MoreMenuItem::Button(MoreMenuButton::new(
+            items.push(MoreMenuItem::Button(Box::new(MoreMenuButton::new(
                 "Add Subject",
                 Box::new(|_, app| {
                     app.dm_draft_data.include_subject = true;
                 }),
-            )));
+            ))));
         }
         if app.dm_draft_data.include_content_warning {
-            items.push(MoreMenuItem::Button(MoreMenuButton::new(
+            items.push(MoreMenuItem::Button(Box::new(MoreMenuButton::new(
                 "Remove Content Warning",
                 Box::new(|_, app| {
                     app.dm_draft_data.include_content_warning = false;
                     app.dm_draft_data.content_warning = "".to_owned();
                 }),
-            )));
+            ))));
         } else {
-            items.push(MoreMenuItem::Button(MoreMenuButton::new(
+            items.push(MoreMenuItem::Button(Box::new(MoreMenuButton::new(
                 "Add Content Warning",
                 Box::new(|_, app| {
                     app.dm_draft_data.include_content_warning = true;
                 }),
-            )));
+            ))));
         }
 
         menu.show_entries(ui, app, response, items);
@@ -646,40 +646,40 @@ fn real_posting_area(app: &mut GossipUi, ctx: &Context, ui: &mut Ui) {
                 let mut items: Vec<MoreMenuItem> = Vec::new();
 
                 if app.draft_data.include_subject {
-                    items.push(MoreMenuItem::Button(MoreMenuButton::new(
+                    items.push(MoreMenuItem::Button(Box::new(MoreMenuButton::new(
                         "Remove Subject",
                         Box::new(|_, app| {
                             app.draft_data.include_subject = false;
                             app.draft_data.subject = "".to_owned();
                         }),
-                    )));
+                    ))));
                 } else {
-                    items.push(MoreMenuItem::Button(MoreMenuButton::new(
+                    items.push(MoreMenuItem::Button(Box::new(MoreMenuButton::new(
                         "Add Subject",
                         Box::new(|_, app| {
                             app.draft_data.include_subject = true;
                         }),
-                    )));
+                    ))));
                 }
 
                 if app.draft_data.include_content_warning {
-                    items.push(MoreMenuItem::Button(MoreMenuButton::new(
+                    items.push(MoreMenuItem::Button(Box::new(MoreMenuButton::new(
                         "Remove Content Warning",
                         Box::new(|_, app| {
                             app.draft_data.include_content_warning = false;
                             app.draft_data.content_warning = "".to_owned();
                         }),
-                    )));
+                    ))));
                 } else {
-                    items.push(MoreMenuItem::Button(MoreMenuButton::new(
+                    items.push(MoreMenuItem::Button(Box::new(MoreMenuButton::new(
                         "Add Content Warning",
                         Box::new(|_, app| {
                             app.draft_data.include_content_warning = true;
                         }),
-                    )));
+                    ))));
                 }
 
-                items.push(MoreMenuItem::Button(
+                items.push(MoreMenuItem::Button(Box::new(
                     MoreMenuButton::new(
                         "Show raw preview",
                         Box::new(|_, app| {
@@ -691,7 +691,7 @@ fn real_posting_area(app: &mut GossipUi, ctx: &Context, ui: &mut Ui) {
                         }),
                     )
                     .enabled(!app.draft_data.replacements.is_empty()),
-                ));
+                )));
 
                 menu.show_entries(ui, app, response, items);
             }

@@ -28,7 +28,7 @@ enum MoreMenuStyle {
 }
 
 pub(in crate::ui) enum MoreMenuItem<'a> {
-    Button(MoreMenuButton<'a>),
+    Button(Box<MoreMenuButton<'a>>),
     SubMenu(MoreMenuSubMenu<'a>),
     Switch(MoreMenuSwitch<'a>),
 }

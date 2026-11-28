@@ -140,7 +140,7 @@ impl UserIdentity {
 
     pub(crate) fn set_remote_signer(
         &self,
-        bunker_client: nip46::BunkerClient,
+        bunker_client: Box<nip46::BunkerClient>,
     ) -> Result<(), Error> {
         let identity = Identity::Remote(bunker_client);
         *self.inner.write_arc() = identity;

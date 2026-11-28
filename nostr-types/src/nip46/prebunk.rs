@@ -84,7 +84,7 @@ impl PreBunkerClient {
 
     /// Connect to the relay and bunker, learn our user's PublicKey,
     /// and return a full BunkerClient which impl Signer
-    pub async fn initialize(&mut self) -> Result<BunkerClient, Error> {
+    pub async fn initialize(&mut self) -> Result<Box<BunkerClient>, Error> {
         let span = span!(Level::DEBUG, "nip46 Prebunk initializing");
         let _enter = span.enter();
 
@@ -133,7 +133,7 @@ impl PreBunkerClient {
 
         let public_key = PublicKey::try_from_hex_string(&pubkey_response.result, true)?;
 
-        Ok(BunkerClient {
+        Ok(Box::new(BunkerClient {
             remote_signer_pubkey: self.remote_signer_pubkey,
             relay_url: self.relay_url.clone(),
             local_signer: self.local_signer.clone(),
@@ -141,7 +141,7 @@ impl PreBunkerClient {
             timeout: self.timeout,
             client,
             sub_id: std::sync::RwLock::new(None),
-        })
+        }))
     }
 
     async fn call(&self, client: &Client, request: Nip46Request) -> Result<Nip46Response, Error> {

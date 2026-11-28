@@ -24,7 +24,7 @@ pub enum Identity {
 
     /// Remote Signer (Bunker)
     #[cfg(feature = "nip46")]
-    Remote(BunkerClient),
+    Remote(Box<BunkerClient>),
 }
 
 // No one besides the Identity has the internal Signer, so we can safely Send

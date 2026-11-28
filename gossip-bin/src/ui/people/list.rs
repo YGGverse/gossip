@@ -314,15 +314,17 @@ pub(super) fn update(
                                     let mut items: Vec<MoreMenuItem> = Vec::new();
 
                                     // actions
-                                    items.push(MoreMenuItem::Button(MoreMenuButton::new(
-                                        "Remove",
-                                        Box::new(|_, _| {
-                                            let _ = GLOBALS.db().remove_person_from_list(
-                                                &person.pubkey,
-                                                list,
-                                                None,
-                                            );
-                                        }),
+                                    items.push(MoreMenuItem::Button(Box::new(
+                                        MoreMenuButton::new(
+                                            "Remove",
+                                            Box::new(|_, _| {
+                                                let _ = GLOBALS.db().remove_person_from_list(
+                                                    &person.pubkey,
+                                                    list,
+                                                    None,
+                                                );
+                                            }),
+                                        ),
                                     )));
 
                                     menu.show_entries(ui, app, response, items);
@@ -789,46 +791,46 @@ pub(super) fn render_more_list_actions(
     );
 
     let mut items: Vec<MoreMenuItem> = Vec::new();
-    items.push(MoreMenuItem::Button(MoreMenuButton::new(
+    items.push(MoreMenuItem::Button(Box::new(MoreMenuButton::new(
         "Rename",
         Box::new(|_, app| {
             app.deleting_list = None;
             app.renaming_list = Some(list);
         }),
-    )));
+    ))));
 
     if metadata.favorite {
-        items.push(MoreMenuItem::Button(MoreMenuButton::new(
+        items.push(MoreMenuItem::Button(Box::new(MoreMenuButton::new(
             "Unset as Favorite",
             Box::new(|_, _| {
                 let mut metadata = metadata.clone();
                 metadata.favorite = false;
                 let _ = GLOBALS.db().set_person_list_metadata(list, &metadata, None);
             }),
-        )));
+        ))));
     } else {
-        items.push(MoreMenuItem::Button(MoreMenuButton::new(
+        items.push(MoreMenuItem::Button(Box::new(MoreMenuButton::new(
             "Set as Favorite",
             Box::new(|_, _| {
                 let mut metadata = metadata.clone();
                 metadata.favorite = true;
                 let _ = GLOBALS.db().set_person_list_metadata(list, &metadata, None);
             }),
-        )));
+        ))));
     }
 
     if on_list {
         if metadata.private == Private(true) {
-            items.push(MoreMenuItem::Button(MoreMenuButton::new(
+            items.push(MoreMenuItem::Button(Box::new(MoreMenuButton::new(
                 "Make Public",
                 Box::new(|_, _| {
                     let mut metadata = metadata.clone();
                     metadata.private = Private(false);
                     let _ = GLOBALS.db().set_person_list_metadata(list, &metadata, None);
                 }),
-            )));
+            ))));
         } else {
-            items.push(MoreMenuItem::Button(MoreMenuButton::new(
+            items.push(MoreMenuItem::Button(Box::new(MoreMenuButton::new(
                 "Make Private",
                 Box::new(|_, _| {
                     let mut metadata = metadata.clone();
@@ -836,9 +838,9 @@ pub(super) fn render_more_list_actions(
                     let _ = GLOBALS.db().set_person_list_metadata(list, &metadata, None);
                     let _ = GLOBALS.db().set_all_people_in_list_to_private(list, None);
                 }),
-            )));
+            ))));
         }
-        items.push(MoreMenuItem::Button(
+        items.push(MoreMenuItem::Button(Box::new(
             MoreMenuButton::new(
                 "Clear All",
                 Box::new(|_, app| {
@@ -846,15 +848,15 @@ pub(super) fn render_more_list_actions(
                 }),
             )
             .enabled(count > 0),
-        ));
+        )));
 
-        items.push(MoreMenuItem::Button(MoreMenuButton::new(
+        items.push(MoreMenuItem::Button(Box::new(MoreMenuButton::new(
             "Delete",
             Box::new(|_, app| {
                 app.renaming_list = None;
                 app.deleting_list = Some(list);
             }),
-        )));
+        ))));
     }
 
     menu.show_entries(ui, app, response, items);
