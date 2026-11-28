@@ -13,6 +13,18 @@ pub mod table;
 use indexmap::{IndexMap, IndexSet};
 pub use table::Table;
 
+#[cfg(test)]
+pub(crate) fn test_storage() -> &'static Storage {
+    use std::sync::OnceLock;
+
+    // Table handles are process-global, so storage tests share one isolated environment.
+    static DIR: OnceLock<tempdir::TempDir> = OnceLock::new();
+    let dir = DIR.get_or_init(|| tempdir::TempDir::new("gossip-storage-tests").unwrap());
+    GLOBALS
+        .storage
+        .get_or_init(|| Storage::new(dir.path(), true).unwrap())
+}
+
 // new tables
 pub mod person3_table;
 pub use person3_table::Person3Table;
