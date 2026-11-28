@@ -677,8 +677,13 @@ impl Fetcher {
                 if status == StatusCode::NOT_MODIFIED {
                     // Touch the file to freshen it
                     // There is no good async way to do this that I have found.
-                    let _ =
-                        filetime::set_file_mtime(cache_file.as_path(), filetime::FileTime::now());
+                    if let Ok(file) = tokio::fs::File::options()
+                        .write(true)
+                        .open(&cache_file)
+                        .await
+                    {
+                        let _ = file.set_modified(std::time::SystemTime::now()).await;
+                    }
 
                     // Read from the file
                     match tokio::fs::read(cache_file.as_path()).await {

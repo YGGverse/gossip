@@ -80,7 +80,6 @@ use crate::profile::Profile;
 use crate::relationship::{RelationshipByAddr, RelationshipById};
 use crate::relay::Relay;
 use dashmap::DashMap;
-use filetime::FileTime;
 use heed::types::{Bytes, Unit};
 use heed::{Database, Env, EnvFlags, EnvOpenOptions, RoTxn, RwTxn};
 use nostr_types::{
@@ -178,15 +177,16 @@ impl Storage {
 
         // If the stamp exists and is less than 1 week old, do not compact
         if let Ok(metadata) = fs::metadata(&stamp) {
-            let last_modified = FileTime::from_last_modification_time(&metadata).seconds();
-            let now = FileTime::now().seconds();
-            if now - last_modified < 60 * 60 * 24 + 7 {
-                return Ok(());
-            } else {
-                // Touch the stamp file
-                let file = fs::File::open(&stamp)?;
-                file.set_modified(SystemTime::now())?;
+            if let Ok(modified) = metadata.modified() {
+                if let Ok(elapsed) = modified.elapsed() {
+                    if elapsed < std::time::Duration::from_secs(60 * 60 * 24 * 7) {
+                        return Ok(());
+                    }
+                }
             }
+            // Touch the stamp file
+            let file = fs::File::options().write(true).open(&stamp)?;
+            file.set_modified(SystemTime::now())?;
         } else {
             // Create stamp file
             fs::File::create(&stamp)?;

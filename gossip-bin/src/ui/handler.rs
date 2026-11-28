@@ -1,5 +1,3 @@
-use core::f32;
-
 use super::{widgets, GossipUi};
 use eframe::egui::{self, vec2, RichText};
 use egui::{Context, Ui};

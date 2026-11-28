@@ -1463,7 +1463,7 @@ mod test {
         println!("SIG: {:?}", event.sig.0.as_ref());
         println!(
             "CONTENT: [len={:?}] {:?}",
-            (event.content.as_bytes().len() as u32).to_ne_bytes(),
+            (event.content.len() as u32).to_ne_bytes(),
             event.content.as_bytes()
         );
         println!("TAGS: [len={:?}]", (event.tags.len() as u32).to_ne_bytes());

@@ -409,7 +409,7 @@ impl FilterSet {
                     // Spam prevention:
                     if !spamsafe && GLOBALS.db().read_setting_avoid_spam_on_unsafe_relays() {
                         filter.authors =
-                            GLOBALS.people.get_subscribed_pubkeys().drain(..).collect();
+                            std::mem::take(&mut GLOBALS.people.get_subscribed_pubkeys());
                     }
 
                     filter
@@ -435,7 +435,7 @@ impl FilterSet {
                     // Spam prevention:
                     if !spamsafe && GLOBALS.db().read_setting_avoid_spam_on_unsafe_relays() {
                         filter.authors =
-                            GLOBALS.people.get_subscribed_pubkeys().drain(..).collect();
+                            std::mem::take(&mut GLOBALS.people.get_subscribed_pubkeys());
                     }
 
                     filter
@@ -483,7 +483,7 @@ impl FilterSet {
         // Spam prevention:
         if !spamsafe && GLOBALS.db().read_setting_avoid_spam_on_unsafe_relays() {
             // As the relay is not spam safe, only take mentions from followers
-            filter.authors = GLOBALS.people.get_subscribed_pubkeys().drain(..).collect();
+            filter.authors = std::mem::take(&mut GLOBALS.people.get_subscribed_pubkeys());
         }
 
         filter

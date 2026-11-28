@@ -320,7 +320,7 @@ mod test {
 
         let s = serde_json::to_string(&prebunk).unwrap();
         println!("{s}");
-        let prebunk2: PreBunkerClient = serde_json::from_str(&*s).unwrap();
+        let prebunk2: PreBunkerClient = serde_json::from_str(&s).unwrap();
         assert_eq!(prebunk.remote_signer_pubkey, prebunk2.remote_signer_pubkey);
         assert_eq!(prebunk.relay_url, prebunk2.relay_url);
         assert_eq!(prebunk.connect_secret, prebunk2.connect_secret);

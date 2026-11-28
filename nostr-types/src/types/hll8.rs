@@ -36,9 +36,7 @@ impl Hll8 {
 
     /// Clear to zero counts
     pub fn clear(&mut self) {
-        for i in 0..=255 {
-            self.0[i] = 0
-        }
+        self.0.fill(0)
     }
 
     /// Add an element to the count by value
@@ -85,8 +83,8 @@ impl Hll8 {
 
         // Sum over the reciprocals (SUM of 2^-m)
         let mut sum: f64 = 0.0;
-        for i in 0..=255 {
-            let power: usize = 1 << self.0[i];
+        for &val in &self.0 {
+            let power: usize = 1 << val;
             sum += 1.0 / (power as f64);
         }
 
