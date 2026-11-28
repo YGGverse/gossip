@@ -1,5 +1,8 @@
 # Gossip
 
+![Linux](https://github.com/yggverse/gossip/actions/workflows/linux.yml/badge.svg)
+[![Dependencies](https://deps.rs/repo/github/yggverse/gossip/status.svg)](https://deps.rs/repo/github/yggverse/gossip)
+
 ## Gossip is a desktop client for NOSTR
 
 Nostr is an open social media protocol empowering lots of software such as this client. The experience is kind of like Twitter except that you control your own account, and you can post to many different independent places called "relays". People are finding many additional uses for NOSTR that go far beyond micro-blogging or chatting, but this client is focused on those.
