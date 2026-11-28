@@ -2,9 +2,9 @@ name: Linux
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "yggverse" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "yggverse" ]
 
 env:
   CARGO_TERM_COLOR: always
