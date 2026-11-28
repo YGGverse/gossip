@@ -1,6 +1,5 @@
 use egui_winit::egui::{ColorImage, Context, TextureHandle, TextureOptions};
 use tiny_skia::Transform;
-use usvg::TreeParsing;
 
 pub const SVG_OVERSAMPLE: f32 = 2.0;
 
@@ -22,12 +21,12 @@ impl Assets {
             };
             let rtree = usvg::Tree::from_data(bytes, &opt).unwrap();
             let [w, h] = [
-                (rtree.size.width() * ppt * SVG_OVERSAMPLE) as u32,
-                (rtree.size.height() * ppt * SVG_OVERSAMPLE) as u32,
+                (rtree.size().width() * ppt * SVG_OVERSAMPLE) as u32,
+                (rtree.size().height() * ppt * SVG_OVERSAMPLE) as u32,
             ];
             let mut pixmap = tiny_skia::Pixmap::new(w, h).unwrap();
-            let tree = resvg::Tree::from_usvg(&rtree);
-            tree.render(
+            resvg::render(
+                &rtree,
                 Transform::from_scale(ppt * SVG_OVERSAMPLE, ppt * SVG_OVERSAMPLE),
                 &mut pixmap.as_mut(),
             );
@@ -43,12 +42,12 @@ impl Assets {
             };
             let rtree = usvg::Tree::from_data(bytes, &opt).unwrap();
             let [w, h] = [
-                (rtree.size.width() * ppt * SVG_OVERSAMPLE) as u32,
-                (rtree.size.height() * ppt * SVG_OVERSAMPLE) as u32,
+                (rtree.size().width() * ppt * SVG_OVERSAMPLE) as u32,
+                (rtree.size().height() * ppt * SVG_OVERSAMPLE) as u32,
             ];
             let mut pixmap = tiny_skia::Pixmap::new(w, h).unwrap();
-            let tree = resvg::Tree::from_usvg(&rtree);
-            tree.render(
+            resvg::render(
+                &rtree,
                 Transform::from_scale(ppt * SVG_OVERSAMPLE, ppt * SVG_OVERSAMPLE),
                 &mut pixmap.as_mut(),
             );

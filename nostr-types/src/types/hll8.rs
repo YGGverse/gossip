@@ -151,12 +151,13 @@ fn estimate_fiatjaf(sum: f64, zero_count: usize) -> f64 {
 
 #[cfg(test)]
 mod test {
+    use rand::Rng;
+
     use super::*;
 
     #[test]
     fn test_hll8() {
         use rand::prelude::IndexedRandom;
-        use rand_core::RngCore;
         let mut rng = rand::rng();
 
         // Create 2500 well known different keys

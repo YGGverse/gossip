@@ -2,7 +2,7 @@ use super::{base64flex, PrivateKey};
 use crate::{Error, PublicKey};
 use aes::cipher::{block_padding::Pkcs7, BlockDecryptMut, BlockEncryptMut, KeyIvInit};
 use base64::Engine;
-use rand_core::RngCore;
+use rand::{Rng, RngExt};
 use sha2::{Digest, Sha256};
 use zeroize::Zeroize;
 

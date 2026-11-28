@@ -30,6 +30,7 @@ use nostr_types::{
     NAddr, NostrBech32, ParsedTag, PayRequestData, PreEvent, PrivateKey, Profile, PublicKey,
     RelayUrl, Tag, UncheckedUrl, Unixtime, Url,
 };
+use rand::RngExt;
 use regex::Regex;
 use reqwest::{Client, Proxy};
 use std::path::{Path, PathBuf};
@@ -531,10 +532,8 @@ impl Overlord {
         mut exclusion: u64,
     ) {
         // Randomize the exclusion to between half and full
-        use rand::Rng;
         if exclusion > 1 {
-            exclusion = rand::thread_rng()
-                .sample(rand::distributions::Uniform::new(exclusion / 2, exclusion));
+            exclusion = rand::rng().random_range(exclusion / 2..exclusion);
         }
 
         // Let the relay picker know it disconnected

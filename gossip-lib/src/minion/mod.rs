@@ -257,22 +257,20 @@ impl Minion {
                 .uri(&uri)
                 .body(())?;
 
-            let config: WebSocketConfig = WebSocketConfig {
-                // Tungstenite default is 64 MiB.
-                // Cameri nostream relay limits to 0.5 a megabyte
-                // Based on my current database of 7356 events, the longest was 11,121 bytes.
-                // Cameri said people with >2k followers were losing data at 128kb cutoff.
-                max_message_size: Some(
+            // Tungstenite default is 64 MiB.
+            // Cameri nostream relay limits to 0.5 a megabyte
+            // Based on my current database of 7356 events, the longest was 11,121 bytes.
+            // Cameri said people with >2k followers were losing data at 128kb cutoff.
+            let config = WebSocketConfig::default()
+                .max_message_size(Some(
                     GLOBALS.db().read_setting_max_websocket_message_size_kb() * 1024,
-                ),
-                max_frame_size: Some(
+                ))
+                .max_frame_size(Some(
                     GLOBALS.db().read_setting_max_websocket_frame_size_kb() * 1024,
-                ),
-                accept_unmasked_frames: GLOBALS
-                    .db()
-                    .read_setting_websocket_accept_unmasked_frames(),
-                ..Default::default()
-            };
+                ))
+                .accept_unmasked_frames(
+                    GLOBALS.db().read_setting_websocket_accept_unmasked_frames(),
+                );
 
             let connect_timeout_secs = if short_timeout {
                 5
@@ -595,7 +593,7 @@ impl Minion {
                 }
             },
             _ = ping_timer.tick() => {
-                ws_stream.send(WsMessage::Ping(vec![0x1])).await?;
+                ws_stream.send(WsMessage::Ping(tungstenite::Bytes::from_static(&[0x1]))).await?;
             },
             _ = task_timer.tick()  => { // 4 seconds
                 // Update subscription for sought events
@@ -638,7 +636,7 @@ impl Minion {
                     WsMessage::Text(t) => {
                         // MAYBE FIXME, spawn a separate task here so that
                         // we don't miss ping ticks
-                        self.handle_nostr_message(t).await?;
+                        self.handle_nostr_message(t.to_string()).await?;
                         // FIXME: some errors we should probably bail on.
                         // For now, try to continue.
                     },
@@ -692,7 +690,7 @@ impl Minion {
                 let wire = serde_json::to_string(&msg)?;
                 let ws_stream = self.stream.as_mut().unwrap();
                 self.last_message_sent = wire.clone();
-                ws_stream.send(WsMessage::Text(wire)).await?;
+                ws_stream.send(WsMessage::Text(wire.into())).await?;
 
                 let id = dmevent.id;
                 self.posting_ids.insert(id, message.job_id);
@@ -700,7 +698,7 @@ impl Minion {
                 let wire = serde_json::to_string(&msg)?;
                 let ws_stream = self.stream.as_mut().unwrap();
                 self.last_message_sent = wire.clone();
-                ws_stream.send(WsMessage::Text(wire)).await?;
+                ws_stream.send(WsMessage::Text(wire.into())).await?;
 
                 tracing::info!("Advertised relay lists to {}", &self.url)
             }
@@ -762,7 +760,7 @@ impl Minion {
                     let wire = serde_json::to_string(&msg)?;
                     let ws_stream = self.stream.as_mut().unwrap();
                     self.last_message_sent = wire.clone();
-                    ws_stream.send(WsMessage::Text(wire)).await?;
+                    ws_stream.send(WsMessage::Text(wire.into())).await?;
                     tracing::info!("Posted event kind={} to {}", kind, &self.url);
                 }
             }
@@ -893,7 +891,7 @@ impl Minion {
                     let wire = serde_json::to_string(&msg)?;
                     let ws_stream = self.stream.as_mut().unwrap();
                     self.last_message_sent = wire.clone();
-                    ws_stream.send(WsMessage::Text(wire)).await?;
+                    ws_stream.send(WsMessage::Text(wire.into())).await?;
                     tracing::info!("Posted event kind={} to {}", kind, &self.url);
                 }
             }
@@ -1040,7 +1038,7 @@ impl Minion {
         let websocket_stream = self.stream.as_mut().unwrap();
         tracing::trace!("{}: Sending {}", &self.url, &wire);
         self.last_message_sent = wire.clone();
-        websocket_stream.send(WsMessage::Text(wire.clone())).await?;
+        websocket_stream.send(WsMessage::Text(wire.into())).await?;
         Ok(())
     }
 
@@ -1058,7 +1056,7 @@ impl Minion {
         let websocket_stream = self.stream.as_mut().unwrap();
         tracing::trace!("{}: Sending {}", &self.url, &wire);
         self.last_message_sent = wire.clone();
-        websocket_stream.send(WsMessage::Text(wire.clone())).await?;
+        websocket_stream.send(WsMessage::Text(wire.into())).await?;
         let id = self.subscription_map.remove(handle);
         if let Some(id) = id {
             tracing::debug!(
@@ -1137,7 +1135,7 @@ impl Minion {
         let wire = serde_json::to_string(&msg)?;
         self.last_message_sent = wire.clone();
         let ws_stream = self.stream.as_mut().unwrap();
-        ws_stream.send(WsMessage::Text(wire)).await?;
+        ws_stream.send(WsMessage::Text(wire.into())).await?;
 
         self.auth_state = AuthState::Waiting(id);
 
@@ -1169,7 +1167,7 @@ impl Minion {
         let wire = serde_json::to_string(&msg)?;
         self.last_message_sent = wire.clone();
         let ws_stream = self.stream.as_mut().unwrap();
-        ws_stream.send(WsMessage::Text(wire)).await?;
+        ws_stream.send(WsMessage::Text(wire.into())).await?;
 
         self.auth_state = AuthState::FakeWaiting(id);
 

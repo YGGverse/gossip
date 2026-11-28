@@ -21,7 +21,7 @@ appimage = [ "gossip-lib/appimage" ]
 bech32 = { workspace = true }
 blurhash = { workspace = true }
 chrono = "0.4.38"
-console-subscriber = "0.4"
+console-subscriber = "0.5"
 eframe = { git = "https://github.com/mikedilger/egui", rev = "20d9aaf91f3f792c53ce252fd8bc8cc4bdc51f78", features = [ "persistence", "wayland", "wgpu" ] }
 egui-winit = { git = "https://github.com/mikedilger/egui", rev = "20d9aaf91f3f792c53ce252fd8bc8cc4bdc51f78", features = [ "default" ] }
 egui_extras = { git = "https://github.com/mikedilger/egui", rev = "20d9aaf91f3f792c53ce252fd8bc8cc4bdc51f78", features = [ "syntect" ] }
@@ -32,23 +32,23 @@ gossip-lib = { path = "../gossip-lib" }
 humansize = "2.1"
 image = { workspace = true }
 lazy_static = { workspace = true }
-memoize = "0.4"
+memoize = "0.6"
 nostr-types = { workspace = true }
 paste = { workspace = true }
-qrcode = "0.14"
-resvg = "0.35"
+qrcode = "0.15"
+resvg = "0.50"
 rpassword = "7.3"
 sdl2 = { version = "0.37", features = ["bundled"], optional = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 speedy = { workspace = true }
 time = { version = "0.3", features = [ "formatting", "macros" ] }
-tiny-skia = "0.10.0"
+tiny-skia = "0.12"
 tokio = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { version = "0.3", features = [ "std", "env-filter", "registry", "fmt" ] }
 url = { workspace = true }
-usvg = "0.35"
+usvg = "0.50"
 zeroize = { workspace = true }
 indexmap = { version = "2.14" }
 mime_guess = "2.0.5"

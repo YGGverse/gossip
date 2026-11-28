@@ -28,7 +28,8 @@ rustls-tls = [
   "dep:tokio-rustls",
   "dep:webpki-roots",
   "nostr-types/rustls-tls",
-  "reqwest/rustls-tls-webpki-roots",
+  "reqwest/rustls",
+  "reqwest/webpki-roots",
   "tungstenite/rustls-tls-webpki-roots",
   "tokio-tungstenite/rustls-tls-webpki-roots",
 ]
@@ -39,21 +40,22 @@ rustls-tls-native = [
   "dep:rustls-pki-types",
   "dep:tokio-rustls",
   "nostr-types/rustls-tls-native",
-  "reqwest/rustls-tls-native-roots",
+  "reqwest/rustls",
+  "reqwest/rustls-native-certs",
   "tungstenite/rustls-tls-native-roots",
-  "tokio-tungstenite/rustls-tls-native-roots",
+  "tokio-tungstenite/rustls-tls-native-roots"
 ]
 
 # Make tweaks for AppImage
 appimage = []
 
 [dependencies]
-base64 = "0.22"
+base64 = "0.23"
 bech32 = { workspace = true }
 blurhash = { workspace = true }
 core-net = "0.1"
 dashmap = "6.0"
-dirs = "5.0"
+dirs = "7.0"
 encoding_rs = "0.8"
 futures = "0.3"
 futures-util = "0.3"
@@ -61,35 +63,35 @@ heed = { version = "0.21", features = [ "read-txn-no-tls" ] }
 hex = "0.4"
 http = "1.1"
 image = { workspace = true }
-infer = "0.16"
-kamadak-exif = "0.5"
+infer = "0.22"
+kamadak-exif = "0.6"
 lazy_static = { workspace = true }
 linkify = { git = "https://github.com/YGGverse/linkify.git", rev = "9485ce3c5d6f7e39d0521b35dc53e76cd7c18cc3" } # I2P + IPv6 patch
 memmap2 = "0.9"
 mime = "0.3"
 mime_guess = "2"
 nostr-types = { workspace = true } #78
-parking_lot = { version = "0.12", features = [ "arc_lock", "send_guard" ] }
+parking_lot = { version = "0.13", features = [ "arc_lock", "send_guard" ] }
 paste = { workspace = true }
-rand = "0.8"
+rand = "0.10"
 regex = "1.10"
-reqwest = { version = "0.12", default-features=false, features = ["brotli", "deflate", "gzip", "json", "stream", "socks"] }
-resvg = "0.43"
+reqwest = { version = "0.13", default-features=false, features = ["brotli", "deflate", "gzip", "json", "stream", "socks"] }
+resvg = "0.50"
 rhai = { version = "1.19", features = [ "std", "sync" ]}
 sdl2 = { version = "0.37", features = ["bundled"], optional = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
-sha2 = "0.10"
+sha2 = "0.11"
 speedy = { workspace = true }
 tempdir = "0.3"
 textnonce = "1"
-tiny-skia = "0.11"
+tiny-skia = "0.12"
 tokio = { workspace = true }
 tracing = { workspace = true }
-tokio-tungstenite = { version = "0.23", default-features = false, features = [ "connect", "handshake" ] }
-tungstenite = { version = "0.23", default-features = false }
+tokio-tungstenite = { version = "0.30", default-features = false, features = [ "connect", "handshake" ] }
+tungstenite = { version = "0.30", default-features = false }
 url = { workspace = true }
-usvg = "0.43"
+usvg = "0.50"
 watcher = { git = "https://github.com/mikedilger/watcher", rev = "a4e7e70c396bca4630aa0ba0a15d54ea103cb0e9" }
 zeroize = { workspace = true }
 identicon-rs = { version = "7.2", features = ["png"] }

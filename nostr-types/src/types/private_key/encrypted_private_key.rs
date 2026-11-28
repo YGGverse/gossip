@@ -3,13 +3,13 @@ use crate::Error;
 use aes::cipher::{block_padding::Pkcs7, BlockDecryptMut, KeyIvInit};
 use base64::Engine;
 use chacha20poly1305::{
-    aead::{Aead, AeadCore, KeyInit, Payload},
+    aead::{Aead, KeyInit, Payload},
     XChaCha20Poly1305,
 };
 use derive_more::Display;
 use hmac::Hmac;
 use pbkdf2::pbkdf2;
-use rand_core::RngCore;
+use rand::Rng;
 use serde::{Deserialize, Serialize};
 use sha2::Sha256;
 #[cfg(feature = "speedy")]
@@ -122,8 +122,11 @@ impl PrivateKey {
             salt
         };
 
-        let mut rng = chacha20poly1305::aead::rand_core::OsRng;
-        let nonce = XChaCha20Poly1305::generate_nonce(&mut rng);
+        let nonce = {
+            let mut bytes: [u8; 24] = [0; 24];
+            rand::rng().fill_bytes(&mut bytes);
+            chacha20poly1305::XNonce::from(bytes)
+        };
 
         let associated_data: Vec<u8> = {
             let key_security: u8 = match self.1 {
@@ -239,10 +242,10 @@ impl PrivateKey {
             aad: associated_data,
         };
 
-        let mut inner_secret = match cipher.decrypt(nonce.into(), payload) {
-            Ok(is) => is,
-            Err(_) => return Err(Error::PrivateKeyEncryption),
-        };
+        let xnonce = nonce.try_into().map_err(|_| Error::PrivateKeyEncryption)?;
+        let mut inner_secret = cipher
+            .decrypt(xnonce, payload)
+            .map_err(|_| Error::PrivateKeyEncryption)?;
 
         if associated_data.is_empty() {
             return Err(Error::InvalidEncryptedPrivateKey);

@@ -87,7 +87,7 @@ impl PrivateKey {
     pub fn generate() -> PrivateKey {
         let mut secret_key;
         loop {
-            secret_key = secp256k1::SecretKey::new(&mut rand::rng());
+            secret_key = secp256k1::SecretKey::new(&mut secp256k1::rand::rng());
             let (_, parity) = secret_key.x_only_public_key(secp256k1::SECP256K1);
             if parity == secp256k1::Parity::Even {
                 break;

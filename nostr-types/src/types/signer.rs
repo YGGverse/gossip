@@ -4,7 +4,7 @@ use crate::{
     Signature, Tag, Unixtime,
 };
 use async_trait::async_trait;
-use rand::Rng;
+use rand::RngExt;
 use std::fmt;
 use std::sync::atomic::{AtomicBool, AtomicU64, AtomicU8, Ordering};
 use std::sync::mpsc::Sender;
