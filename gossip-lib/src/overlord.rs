@@ -1,4 +1,4 @@
-use crate::blossom::{BlobDescriptor, Blossom, HashOutput};
+use crate::blossom::{BlobDescriptor, Blossom, HashOutput, PostMeta};
 use crate::comms::{
     RelayConnectionReason, RelayJob, ToMinionMessage, ToMinionPayload, ToMinionPayloadDetail,
     ToOverlordMessage,
@@ -725,22 +725,14 @@ impl Overlord {
             }
             ToOverlordMessage::Post {
                 content,
-                blossom,
-                mimelist,
+                meta,
                 tags,
                 in_reply_to,
                 annotation,
                 dm_channel,
             } => {
-                self.post(
-                    content,
-                    (mimelist, blossom),
-                    tags,
-                    in_reply_to,
-                    annotation,
-                    dm_channel,
-                )
-                .await?;
+                self.post(content, meta, tags, in_reply_to, annotation, dm_channel)
+                    .await?;
             }
             ToOverlordMessage::PostAgain(event) => {
                 self.post_again(event)?;
@@ -2119,11 +2111,7 @@ impl Overlord {
     pub async fn post(
         &mut self,
         content: String,
-        (mimelist, fallback): (
-            // @TODO make struct
-            Option<IndexMap<String, String>>,
-            Option<IndexMap<UncheckedUrl, String>>,
-        ),
+        meta: PostMeta,
         tags: Vec<Tag>,
         in_reply_to: Option<Id>,
         annotation: bool,
@@ -2142,7 +2130,13 @@ impl Overlord {
             Some(channel) => {
                 if channel.can_use_nip17() {
                     crate::post::prepare_post_nip17(
-                        author, content, mimelist, fallback, tags, channel, annotation,
+                        author,
+                        content,
+                        meta.mimelist,
+                        meta.fallback,
+                        tags,
+                        channel,
+                        annotation,
                     )
                     .await?
                 } else {
@@ -2160,8 +2154,8 @@ impl Overlord {
                         crate::post::prepare_post_normal(
                             author,
                             content,
-                            mimelist,
-                            fallback,
+                            meta.mimelist,
+                            meta.fallback,
                             tags,
                             Some(parent),
                             annotation,
@@ -2169,13 +2163,25 @@ impl Overlord {
                         .await?
                     } else {
                         crate::post::prepare_post_comment(
-                            author, content, mimelist, fallback, tags, parent, annotation,
+                            author,
+                            content,
+                            meta.mimelist,
+                            meta.fallback,
+                            tags,
+                            parent,
+                            annotation,
                         )
                         .await?
                     }
                 } else {
                     crate::post::prepare_post_normal(
-                        author, content, mimelist, fallback, tags, None, annotation,
+                        author,
+                        content,
+                        meta.mimelist,
+                        meta.fallback,
+                        tags,
+                        None,
+                        annotation,
                     )
                     .await?
                 }

@@ -1,9 +1,10 @@
 use crate::error::{Error, ErrorKind};
 use crate::globals::GLOBALS;
 use base64::Engine;
+use indexmap::IndexMap;
 use memmap2::Mmap;
 use mime::Mime;
-use nostr_types::{EventKind, ParsedTag, PreEvent, Tag, Unixtime};
+use nostr_types::{EventKind, ParsedTag, PreEvent, Tag, UncheckedUrl, Unixtime};
 use reqwest::header::{AUTHORIZATION, CONTENT_LENGTH, CONTENT_TYPE};
 use reqwest::{Body, Client, Proxy, Response};
 use serde::{Deserialize, Serialize};
@@ -318,4 +319,12 @@ pub fn get_content_type(path: &Path) -> Result<Mime, Error> {
             .first()
             .unwrap_or(mime::APPLICATION_OCTET_STREAM),
     })
+}
+
+#[derive(Debug, Clone)]
+pub struct PostMeta {
+    /// URL / sha256
+    pub fallback: Option<IndexMap<UncheckedUrl, String>>,
+    /// Locally parsed mime type array to map URLs without extension
+    pub mimelist: Option<IndexMap<String, String>>,
 }

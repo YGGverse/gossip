@@ -1,10 +1,11 @@
+use crate::blossom::PostMeta;
 use crate::dm_channel::DmChannel;
 use crate::filter_set::FilterSet;
 use crate::misc::Private;
 use crate::nostr_connect_server::{Approval, ParsedCommand};
 use crate::people::PersonList;
 use crate::relay::Relay;
-use indexmap::{IndexMap, IndexSet};
+use indexmap::IndexSet;
 use nostr_types::{
     Event, EventKind, EventReference, Id, Metadata, MilliSatoshi, NAddr, Profile, PublicKey,
     RelayUrl, Tag, UncheckedUrl, Unixtime, Url,
@@ -134,10 +135,7 @@ pub enum ToOverlordMessage {
     /// Calls [post](crate::Overlord::post)
     Post {
         content: String,
-        /// URL / sha256
-        blossom: Option<IndexMap<UncheckedUrl, String>>,
-        // Locally parsed mime type array to map URLs without extension
-        mimelist: Option<IndexMap<String, String>>,
+        meta: PostMeta,
         tags: Vec<Tag>,
         in_reply_to: Option<Id>,
         annotation: bool,

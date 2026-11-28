@@ -8,6 +8,7 @@ use egui::{Align, Context, Key, Layout, Modifiers, RichText, Ui};
 use egui_winit::egui::text::{CCursor, CCursorRange};
 use egui_winit::egui::text_edit::TextEditOutput;
 use egui_winit::egui::{vec2, AboveOrBelow, Id};
+use gossip_lib::blossom::PostMeta;
 use gossip_lib::comms::ToOverlordMessage;
 use gossip_lib::{DmChannel, PersonTable, Relay, Table, GLOBALS};
 use indexmap::IndexMap;
@@ -410,11 +411,13 @@ fn dm_posting_area(
 
         let _ = GLOBALS.to_overlord.send(ToOverlordMessage::Post {
             annotation: app.dm_draft_data.is_annotate,
-            blossom: app.dm_draft_data.blossom.clone(),
+            meta: PostMeta {
+                fallback: app.dm_draft_data.blossom.clone(),
+                mimelist: app.dm_draft_data.mimelist.clone(),
+            },
             content: app.dm_draft_data.draft.clone(),
             dm_channel: Some(dm_channel.to_owned()),
             in_reply_to: None,
-            mimelist: app.dm_draft_data.mimelist.clone(),
             tags,
         });
 
@@ -787,11 +790,13 @@ fn real_posting_area(app: &mut GossipUi, ctx: &Context, ui: &mut Ui) {
             Some(replying_to_id) => {
                 let _ = GLOBALS.to_overlord.send(ToOverlordMessage::Post {
                     annotation: app.draft_data.is_annotate,
-                    blossom: app.draft_data.blossom.clone(),
+                    meta: PostMeta {
+                        fallback: app.draft_data.blossom.clone(),
+                        mimelist: app.draft_data.mimelist.clone(),
+                    },
                     content: replaced,
                     dm_channel: None,
                     in_reply_to: Some(replying_to_id),
-                    mimelist: app.draft_data.mimelist.clone(),
                     tags,
                 });
             }
@@ -803,11 +808,13 @@ fn real_posting_area(app: &mut GossipUi, ctx: &Context, ui: &mut Ui) {
                 } else {
                     let _ = GLOBALS.to_overlord.send(ToOverlordMessage::Post {
                         annotation: app.draft_data.is_annotate,
-                        blossom: app.draft_data.blossom.clone(),
+                        meta: PostMeta {
+                            fallback: app.draft_data.blossom.clone(),
+                            mimelist: app.draft_data.mimelist.clone(),
+                        },
                         content: replaced,
                         dm_channel: None,
                         in_reply_to: None,
-                        mimelist: app.draft_data.mimelist.clone(),
                         tags,
                     });
                 }
