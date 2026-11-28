@@ -13,7 +13,7 @@ use std::time::{Duration, Instant};
 
 pub(super) fn update(app: &mut GossipUi, ctx: &Context, _frame: &mut eframe::Frame, ui: &mut Ui) {
     // Possibly refresh DM channels (every 5 seconds)
-    if app.dm_channel_next_refresh < Instant::now() {
+    if app.seen.take_dm_counts_dirty() || app.dm_channel_next_refresh < Instant::now() {
         let result = GLOBALS
             .runtime
             .block_on(async { GLOBALS.db().dm_channels().await });
@@ -45,7 +45,9 @@ pub(super) fn update(app: &mut GossipUi, ctx: &Context, _frame: &mut eframe::Fra
             .show(ui)
             .clicked()
         {
-            let _ = GLOBALS.db().mark_all_dms_read();
+            // The Overlord runs the existing scan on a blocking task; repeated
+            // clicks are coalesced until that batch settles.
+            app.seen.mark_all_dms_read();
         }
     });
 

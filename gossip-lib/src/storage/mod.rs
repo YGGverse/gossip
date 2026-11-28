@@ -1094,7 +1094,7 @@ impl Storage {
 
     /// Is an event viewed?
     #[inline]
-    pub fn is_event_viewed(&self, id: Id) -> Result<bool, Error> {
+    pub(crate) fn is_event_viewed(&self, id: Id) -> Result<bool, Error> {
         self.is_event_viewed1(id)
     }
 
@@ -2462,7 +2462,7 @@ impl Storage {
                 // Do not count self-authored events as unread, irrespective of whether they are viewed
                 0
             } else {
-                1 - self.is_event_viewed(event.id)? as usize
+                1 - crate::seen::is_viewed_in(self, event.id)? as usize
             };
             if event.kind == EventKind::EncryptedDirectMessage {
                 let time = event.created_at;

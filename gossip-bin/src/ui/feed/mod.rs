@@ -141,12 +141,10 @@ pub(super) fn update(app: &mut GossipUi, ctx: &Context, ui: &mut Ui) {
                                 .show(ui)
                                 .clicked()
                             {
+                                // Send the exact captured feed list; the Overlord
+                                // batches and persists it without blocking the UI.
                                 let feed = app.displayed_feed.clone();
-                                let mut txn = GLOBALS.db().get_write_txn().unwrap();
-                                for id in feed.iter() {
-                                    let _ = GLOBALS.db().mark_event_viewed(*id, Some(&mut txn));
-                                }
-                                let _ = txn.commit();
+                                app.seen.mark_many_read(feed);
                             }
                         });
                     }
@@ -206,12 +204,10 @@ pub(super) fn update(app: &mut GossipUi, ctx: &Context, ui: &mut Ui) {
                             .show(ui)
                             .clicked()
                         {
+                            // Send the exact captured feed list; the Overlord
+                            // batches and persists it without blocking the UI.
                             let feed = app.displayed_feed.clone();
-                            let mut txn = GLOBALS.db().get_write_txn().unwrap();
-                            for id in feed.iter() {
-                                let _ = GLOBALS.db().mark_event_viewed(*id, Some(&mut txn));
-                            }
-                            let _ = txn.commit();
+                            app.seen.mark_many_read(feed);
                         }
                     });
                 },

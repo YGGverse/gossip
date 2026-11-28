@@ -37,6 +37,10 @@ pub enum ToOverlordMessage {
     /// pass 'true' as the second parameter for a permanent approval
     AuthDeclined(RelayUrl, bool),
 
+    /// Accumulate a seen (viewed) write. The Overlord batches it and persists it
+    /// on a blocking task, so the UI and the command loop never wait for LMDB.
+    Seen(crate::seen::SeenCommand),
+
     /// Calls [blossom_upload](crate::Overlord::blossom_upload)
     /// Uploads the local file to a blossom server
     BlossomUpload(PathBuf),

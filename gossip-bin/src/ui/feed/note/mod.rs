@@ -90,10 +90,7 @@ pub fn render_note(
             }
 
             let viewed = matches!(app.page, Page::Feed(FeedKind::Global))
-                || GLOBALS
-                    .db()
-                    .is_event_viewed(note_data.event.id)
-                    .unwrap_or(false);
+                || app.seen.is_viewed(note_data.event.id);
 
             let is_new = read_setting!(highlight_unread_events) && !viewed;
 
@@ -167,7 +164,7 @@ pub fn render_note(
                 }
             }
 
-            // Mark post as viewed if hovered AND we are not scrolling
+            // Mark post as viewed only when hovered and not scrolling.
             if !viewed
                 && ui
                     .interact(
@@ -178,7 +175,7 @@ pub fn render_note(
                     .hovered()
                 && !app.is_scrolling()
             {
-                let _ = GLOBALS.db().mark_event_viewed(id, None);
+                app.seen.mark_hovered(id);
             }
 
             // Record if the rendered note was visible
@@ -232,10 +229,7 @@ pub fn render_dm_note(app: &mut GossipUi, ui: &mut Ui, feed_note_params: FeedNot
 
     if let Some(note_ref) = app.notecache.try_update_and_get(&id) {
         if let Ok(note_data) = note_ref.try_borrow() {
-            let viewed = GLOBALS
-                .db()
-                .is_event_viewed(note_data.event.id)
-                .unwrap_or_default();
+            let viewed = app.seen.is_viewed(note_data.event.id);
 
             if let Ok(mut note_data) = note_ref.try_borrow_mut() {
                 note_data.repost = Some(RepostType::GenericRepost);
@@ -264,9 +258,8 @@ pub fn render_dm_note(app: &mut GossipUi, ui: &mut Ui, feed_note_params: FeedNot
                         render_note_inside_framing(app, ui, note_ref.clone(), &render_data, &None);
                     });
 
-            // Mark post as viewed if hovered AND we are not scrolling
             if !viewed && inner_response.response.hovered() && !app.is_scrolling() {
-                let _ = GLOBALS.db().mark_event_viewed(id, None);
+                app.seen.mark_hovered(id);
             }
         }
     }

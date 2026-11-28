@@ -217,6 +217,10 @@ pub struct Globals {
 
     /// Notify the UI to redraw.
     pub notify_ui_redraw: Notify,
+
+    /// Notifies the UI when a seen-write batch settles. This is a notification
+    /// channel, not a work queue; the UI reconciles its optimistic state from it.
+    pub seen_results: broadcast::Sender<crate::seen::SeenWriteResult>,
 }
 
 lazy_static! {
@@ -229,6 +233,9 @@ lazy_static! {
 
         // Setup a communications channel from the Minions to the Overlord.
         let (to_overlord, tmp_overlord_receiver) = mpsc::unbounded_channel();
+
+        // Notifications for settled seen-write batches (UI reconciliation).
+        let (seen_results, _) = broadcast::channel(256);
 
         // Setup a watch channel for going offline state change
         // We start in the Offline state
@@ -305,6 +312,7 @@ lazy_static! {
             follows: PRwLock::new(FollowList::default()),
             delayed_posts: DashSet::new(),
             notify_ui_redraw: Notify::new(),
+            seen_results,
         }
     };
 }
